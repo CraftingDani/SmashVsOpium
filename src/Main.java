@@ -61,3 +61,10 @@ public class Main extends JavaPlugin
         return plugin;
     }
 }
+
+
+
+//-- TODO --\\
+
+// - challenge system
+// - 
