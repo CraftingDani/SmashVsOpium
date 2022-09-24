@@ -1,0 +1,13 @@
+name: UnitedWorld
+
+version: 1.0
+
+author: CraftingDani
+
+api-version: 1.19
+
+main: Main
+
+commands:
+   pay:
+   setmoney:
