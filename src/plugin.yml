@@ -10,4 +10,6 @@ main: Main
 
 commands:
    pay:
+      description: "pay money to other players"
    setmoney:
+      description: "set the amount of money for a specific player"
