@@ -14,7 +14,7 @@ public class ChatMessageListener implements Listener
         e.setCancelled(true);
 
         message = e.getMessage();
-        replace();
+        replace(); // replace color codes to colored text
 
         Bukkit.broadcastMessage("§a" + e.getPlayer().getName() + "§2: §f" +  message);
     }

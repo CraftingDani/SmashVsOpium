@@ -13,3 +13,12 @@ commands:
       description: "pay money to other players"
    setmoney:
       description: "set the amount of money for a specific player"
+   joinchallenge:
+      description: "go to the challenge to earn extra money"
+   leavechallenge:
+      description: "leave the challenge and return to the regular world"
+   ec:
+      description: "open your ender chest"
+   buyheart:
+      description: "buy a heart if you lost one because you had negative money"
+   startproject:

@@ -7,7 +7,6 @@ import org.bukkit.entity.Player;
 
 public class PayCommand implements CommandExecutor
 {
-
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
     {
@@ -27,8 +26,19 @@ public class PayCommand implements CommandExecutor
         
         FileConfiguration config = Main.getPlugin().getConfig();
         int balance = Integer.parseInt(config.getString("balances." + player.getName()));
-        int amount = Integer.parseInt(args[1]);
-        Player target = Bukkit.getPlayer(args[0]);
+        int amount;
+        Player target;
+
+        try
+        {
+            amount = Integer.parseInt(args[1]);
+            target = Bukkit.getPlayer(args[0]);
+        }
+        catch(Exception e)
+        {
+            player.sendMessage("§cPlease use §2/" + label + " <player> <amount>§c!");
+            return false;
+        }
         
         if(target == null)
         {
@@ -36,10 +46,14 @@ public class PayCommand implements CommandExecutor
             return false;
         }
 
+        if(amount < 0)
+        {
+            player.sendMessage("§cYou are not allowed to pay negative money!");
+            return false;
+        }
+
         if((balance - amount) < 0)
         {
-            player.sendMessage("bal: " + balance);
-            player.sendMessage("am: " + amount);
             player.sendMessage("§cYou do not have enough money!");
             return false;
         }
