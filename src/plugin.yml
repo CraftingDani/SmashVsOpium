@@ -22,3 +22,6 @@ commands:
    buyheart:
       description: "buy a heart if you lost one because you had negative money"
    startproject:
+   shop add:
+   shop list:
+   shop:

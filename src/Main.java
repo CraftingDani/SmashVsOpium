@@ -49,6 +49,7 @@ public class Main extends JavaPlugin
         getCommand("ec").setExecutor(new EcCommand());
         getCommand("startproject").setExecutor(new StartProjectCommand()); // animate border
         getCommand("buyheart").setExecutor(new BuyHeartCommand()); // buy heart after negative money
+        getCommand("shop").setExecutor(new ShopCommand());
     }
 
     private void initEvents()
@@ -101,5 +102,4 @@ public class Main extends JavaPlugin
 
 //-- TODO --\\
 
-// - start animation, countdown
- 
+// - start: animation, countdown

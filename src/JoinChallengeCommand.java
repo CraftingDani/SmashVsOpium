@@ -147,7 +147,7 @@ public class JoinChallengeCommand implements CommandExecutor
             Particle[] particles = { Particle.DRAGON_BREATH, Particle.END_ROD, Particle.ELECTRIC_SPARK };
             
             cloud.setBasePotionData(new PotionData(PotionType.INSTANT_DAMAGE));
-            cloud.setParticle(particles[random(3)]); // EffectDefault,enchant,endrod,electricSpark,
+            cloud.setParticle(particles[random(3)]);
             
         }, 1 * 20);
     }
@@ -178,7 +178,7 @@ public class JoinChallengeCommand implements CommandExecutor
                     randoms[i] = rand;
             }
         }
-        // TODO fix not workig
+
         return playerLoc.add(randoms[0], 0, randoms[1]);
     }
 }

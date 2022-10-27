@@ -40,6 +40,8 @@ public class BuyHeartCommand implements CommandExecutor
 
         player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() +2);
         player.sendMessage("§aYou  bought a heart for " + Main.HEART_MONEY + " coins.");
+        config.set("balances." + player.getName(), config.getInt("balances." + player.getName()) - Main.HEART_MONEY);
+        Main.updateScoreboard(player);
         Main.getPlugin().saveConfig();
 
         return false;
