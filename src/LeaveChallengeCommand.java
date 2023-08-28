@@ -18,7 +18,7 @@ public class LeaveChallengeCommand implements CommandExecutor
 
         Player player = (Player) sender;
 
-        if(!player.hasPermission("unitedWorld.leaveChallenge"))
+        if(!player.hasPermission("svo.leavechallenge"))
         {
             player.sendMessage("§cYou do not have the permission to use this command.");
             return false;
@@ -34,8 +34,11 @@ public class LeaveChallengeCommand implements CommandExecutor
 
         Bukkit.getScheduler().cancelTask(config.getInt("timeScheduler." + player.getName()));
         Bukkit.getScheduler().cancelTask(config.getInt("spawnScheduler." + player.getName()));
+        Bukkit.getScheduler().cancelTask(config.getInt("challengeTimeScheduler." + player.getName()));
+        
         config.set("timeScheduler." + player.getName(), null);
         config.set("spawnScheduler." + player.getName(), null);
+        config.set("challengeTimeScheduler." + player.getName(), null);
 
         player.teleport(config.getLocation("lastLocation." + player.getName()));
         player.sendMessage("§aYou left the challenge.");

@@ -1,4 +1,3 @@
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -12,28 +11,40 @@ public class ShopCommand implements CommandExecutor
     @Override
     public boolean onCommand(CommandSender sender, Command arg1, String label, String[] args)
     {
-        if(!(sender instanceof Player))
+        /*if(!(sender instanceof Player))
         {
             sender.sendMessage("§cYou can only use this command as a player.");
             return false;
-        }
+        }*/
 
         Player player = (Player) sender;
 
-        if(!player.hasPermission("unitedWorld.shop"))
+        if(!player.hasPermission("svo.shop"))
         {
             player.sendMessage("§cYou do not have the permission to use this command.");
             return false;
         }
 
-        player.sendMessage(args[0]);
-
         if(args[0].equals("list"))
         {
-            listShops(player);
+            listAds(player);
             return false;
         }
 
+        if(args[0].equals("remove"))
+        {
+            removeAd(player, args[1]);
+            return false;
+        }
+
+        addAd(player, args);
+        
+        return false;
+    }
+
+
+    private void addAd(Player player, String[] args)
+    {
         String name;
         int price;
 
@@ -41,31 +52,25 @@ public class ShopCommand implements CommandExecutor
         {
             name = args[1];
             price = Integer.parseInt(args[2]);
+            config.set("shopOffers", config.getStringList("shopOfers").add(player.getName() + " " + name + " " + price));
         }
         catch (Exception e)
         {
-            player.sendMessage("§cPlease use /" + label + " add <name> <price>!");
-            return false;
+            player.sendMessage("§cPlease use /shop add <name> <price>!");
         }
-        
-        Bukkit.broadcastMessage("added " + name + ", " + price);
-
-        ShopAd ad = new ShopAd(name, price, player);
-
-        config.set("shopAds." + (config.getInt("shopAdCount") +1), ad); // add ad
-        config.set("shopAdCount", config.getInt("shopAdCount") +1); // increment count
 
         Main.getPlugin().saveConfig();
-
-        return false;
     }
 
 
-    private void listShops(Player player)
+    private void listAds(Player player)
     {
-        for(int i = 0; i < config.getInt("shopAdCount"); i++)
-        {
-            player.sendMessage(config.get("shopAds." + (i+1)) + "");
-        }
+        player.sendMessage(config.getString("shopOffers.*.name"));
+    }
+
+
+    private void removeAd(Player player, String name)
+    {
+
     }
 }

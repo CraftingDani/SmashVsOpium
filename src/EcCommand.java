@@ -1,3 +1,4 @@
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -7,7 +8,7 @@ public class EcCommand implements CommandExecutor
 {
 
     @Override
-    public boolean onCommand(CommandSender sender, Command arg1, String arg2, String[] args)
+    public boolean onCommand(CommandSender sender, Command arg1, String label, String[] args)
     {
         if(!(sender instanceof Player))
         {
@@ -17,15 +18,26 @@ public class EcCommand implements CommandExecutor
 
         Player player = (Player) sender;
 
-        if(!player.hasPermission("unitedWorld.ec"))
+        if(args.length > 0)
         {
-            player.sendMessage("§cYou do not have the permission to use this command.");
+            if(!player.hasPermission("svo.ec.others"))
+            {
+                player.sendMessage("§cYou can only open your own enderchest. Please use §4/" + label + ".");
+                return false;
+            }
+
+            try { player.openInventory(Bukkit.getPlayer(args[0]).getEnderChest()); }
+            catch(Exception e) { player.sendMessage("§cError"); }
             return false;
         }
 
-        player.openInventory(player.getEnderChest());
+        if(player.hasPermission("svo.ec"))
+        {
+            player.openInventory(player.getEnderChest());
+            return false;
+        }
         
+        player.sendMessage("§cYou do not have the permission to use this command.");
         return false;
     }
-
 }

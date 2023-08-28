@@ -18,14 +18,14 @@ public class PayCommand implements CommandExecutor
 
         Player player = (Player) sender;
 
-        if(!player.hasPermission("UnitedWorld.pay"))
+        if(!player.hasPermission("svo.pay"))
         {
             player.sendMessage("§cYou do not have the permission to use this command.");
             return false;
         }
         
         FileConfiguration config = Main.getPlugin().getConfig();
-        int balance = Integer.parseInt(config.getString("balances." + player.getName()));
+        double balance = config.getInt("balances." + player.getName());
         int amount;
         Player target;
 

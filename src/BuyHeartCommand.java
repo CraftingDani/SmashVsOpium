@@ -18,7 +18,7 @@ public class BuyHeartCommand implements CommandExecutor
 
         Player player = (Player) sender;
 
-        if(!player.hasPermission("unitedWorld.buyHeart"))
+        if(!player.hasPermission("svo.buyheart"))
         {
             player.sendMessage("§cYou do not have the permission to use this command.");
             return false;
@@ -35,6 +35,12 @@ public class BuyHeartCommand implements CommandExecutor
         if(config.getInt("balances." + player.getName()) < Main.HEART_MONEY)
         {
             player.sendMessage("§cYou do not have enough money.");
+            return false;
+        }
+
+        if(config.getString("hasKilled." + player.getName()) != null)
+        {
+            player.sendMessage("§cYou have killed a mate, they have to forgive you before you can repurchase your hearts.");
             return false;
         }
 

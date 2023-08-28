@@ -1,4 +1,4 @@
-name: UnitedWorld
+name: SmashVsOpium
 
 version: 1.0
 
@@ -12,16 +12,45 @@ commands:
    pay:
       description: "pay money to other players"
    setmoney:
-      description: "set the amount of money for a specific player"
-   joinchallenge:
-      description: "go to the challenge to earn extra money"
-   leavechallenge:
-      description: "leave the challenge and return to the regular world"
+      description: "(admin only) set the amount of money for a specific player"
+   challengeworld:
+      description: "enter or leave the challenge world"
    ec:
       description: "open your ender chest"
    buyheart:
       description: "buy a heart if you lost one because you had negative money"
    startproject:
-   shop add:
-   shop list:
-   shop:
+      description: "(admin only) starts the project"
+   invsee:
+      description: "(admin only) see other player's inventories"
+   protect: 
+      description: "prevent other players from interacting with the barrel you look at"
+   unprotect:
+      description: "unprotect a barrel you have protected"
+   extraheart:
+      description: "buy extra hearts"
+   adminshop:
+      description: "enter or leave the adminshop"
+   forgive:
+      description: "forgive a teammate who has killed you"
+   spawn:
+      description: "teleport yourself to the spawn when an enemy is near your base"
+   prison:
+      description: "(admin only) send a player to the prison"
+   vip:
+   dish:
+      description: "(judge only) manage finances"
+   market:
+      description: "market command"
+   hsvwehs:
+      description: "(judge only) hat sich verhalten wie ein Hurensohn"
+   dev:
+      description: "(admin only) used by admins during development/bugfixing"
+   wartungsarbeiten:
+      description: "(admin only) used during development/bugfixing"
+
+
+permissions:
+  SmashVsOpium.writefile:
+    description: Allows my plugin to write to files on the file system.
+    default: op

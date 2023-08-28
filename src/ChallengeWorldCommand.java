@@ -18,8 +18,10 @@ import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 
-public class JoinChallengeCommand implements CommandExecutor
+public class ChallengeWorldCommand implements CommandExecutor
 {
     @Override
     public boolean onCommand(CommandSender sender, Command arg1, String arg2, String[] arg3)
@@ -31,25 +33,47 @@ public class JoinChallengeCommand implements CommandExecutor
         }
 
         Player player = (Player) sender;
+        
+        if(Main.checkPrison(player.getName()))
+        {
+            player.sendMessage("§cYou cannot use this command while you are in prison!");
+            return false;
+        }
 
-        if(!player.hasPermission("unitedWorld.joinChallenge"))
+        if(!player.hasPermission("svo.challenge"))
         {
             player.sendMessage("§cYou do not have the permission to use this command.");
             return false;
         }
 
-        if(player.getWorld() == Bukkit.getWorld("Event"))
+        if(player.getWorld() == Bukkit.getWorld("challenge"))
         {
-            player.sendMessage("§cYou do are already in the challenge world.");
+            leaveChallenge(player);
             return false;
         }
-        
+
         FileConfiguration config = Main.getPlugin().getConfig();
 
-        player.sendMessage("§aYou have been teleported to the challenge. §2Good luck!");
-        config.set("lastLocation." + player.getName(), player.getLocation());
-        player.teleport(new Location(Bukkit.getWorld("Event"), 50.5, -60, 50.5, -180, 0));
+        player.sendMessage("§8You have been teleported to the challenge world. " + Main.getPlayerTeamColor(player.getName()) + "Good luck!");
+        if(player.getWorld() != Bukkit.getWorld("prison")) config.set("lastLocation." + player.getName(), player.getLocation());
+        player.teleport(new Location(Bukkit.getWorld("challenge"), 0.5, -58, 0.5, -180, 0));
         player.setGameMode(GameMode.SURVIVAL);
+
+        int challengeTimeScheduler = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getPlugin(), new Runnable()
+        {
+            int count = 0;
+
+            @Override
+            public void run()
+            {
+                count++;
+                int minutes = (count % 3600) / 60;
+                int seconds = count % 60;
+                player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(Main.getPlayerTeamColor(player.getName()) + minutes + "§8:" + Main.getPlayerTeamColor(player.getName()) + seconds));
+            }
+        }, 1 * 20, 1 * 20);
+
+        config.set("challengeTimeScheduler." + player.getName(), challengeTimeScheduler);
 
         int timeScheduler = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getPlugin(), new Runnable()
         {
@@ -58,27 +82,42 @@ public class JoinChallengeCommand implements CommandExecutor
             @Override
             public void run()
             {
-                config.set("balances." + player.getName(), config.getInt("balances." + player.getName()) + 1);
+                config.set("balances." + player.getName(), config.getInt("balances." + player.getName()) + Main.CHALLENGE_MONEY);
                 Main.getPlugin().saveConfig();
-                if(count > 0) player.sendMessage("§aYou earned some money for surviving another five minutes!");
-                else          player.sendMessage("§aYou earned some money for surviving five minutes!");
+                if(count > 0) player.sendMessage("§8You earned some money for surviving another " + Main.CHALLENGE_MONEY_TIME + " minutes!");
+                else          player.sendMessage("§8You earned some money for surviving " + Main.CHALLENGE_MONEY_TIME + " minutes!");
                 count++;
                 Main.updateScoreboard(player);
             }
-        }, 5 * 60 * 20, 5 * 60 * 20);
+        }, Main.CHALLENGE_MONEY_TIME * 60 * 20, Main.CHALLENGE_MONEY_TIME * 60 * 20);
 
         config.set("timeScheduler." + player.getName(), timeScheduler);
         
         int spawnScheduler = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getPlugin(), () ->
         {
             randomAction(5, player);
-            
-        }, 10 * 20, 20 * 20);
+        }, 5 * 20, Main.CHALLENGE_EVENT_TIME * 20);
         
         config.set("spawnScheduler." + player.getName(), spawnScheduler);
         Main.getPlugin().saveConfig();
 
         return false;
+    }
+
+    private void leaveChallenge(Player player)
+    {
+        FileConfiguration config = Main.getPlugin().getConfig();
+
+        Bukkit.getScheduler().cancelTask(config.getInt("timeScheduler." + player.getName()));
+        Bukkit.getScheduler().cancelTask(config.getInt("spawnScheduler." + player.getName()));
+        Bukkit.getScheduler().cancelTask(config.getInt("challengeTimeScheduler." + player.getName()));
+        
+        config.set("timeScheduler." + player.getName(), null);
+        config.set("spawnScheduler." + player.getName(), null);
+        config.set("challengeTimeScheduler." + player.getName(), null);
+
+        player.teleport(config.getLocation("lastLocation." + player.getName()));
+        player.sendMessage("§8You left the challenge world.");
     }
 
 
@@ -126,6 +165,7 @@ public class JoinChallengeCommand implements CommandExecutor
         zombie.getEquipment().setBoots(new ItemStack(Material.DIAMOND_BOOTS));
         zombie.setAdult();
         zombie.setHealth(6);
+        zombie.setCanPickupItems(false);
         zombie.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 999999, 255, false, false));
     }
 
@@ -134,7 +174,7 @@ public class JoinChallengeCommand implements CommandExecutor
         Location playerLoc = player.getLocation();
         Bukkit.getScheduler().scheduleSyncDelayedTask(Main.getPlugin(), () -> 
         {
-            Bukkit.getWorld("Event").spawnEntity(playerLoc, EntityType.LIGHTNING);
+            player.getWorld().spawnEntity(playerLoc, EntityType.LIGHTNING);
         }, 20);
     }
 
@@ -143,11 +183,13 @@ public class JoinChallengeCommand implements CommandExecutor
         Location playerLoc = player.getLocation();
         Bukkit.getScheduler().scheduleSyncDelayedTask(Main.getPlugin(), () -> 
         {
+            int random = random(4);
             AreaEffectCloud cloud = (AreaEffectCloud) player.getWorld().spawnEntity(playerLoc, EntityType.AREA_EFFECT_CLOUD);
-            Particle[] particles = { Particle.DRAGON_BREATH, Particle.END_ROD, Particle.ELECTRIC_SPARK };
+            Particle[] particles = { Particle.DRAGON_BREATH, Particle.END_ROD, Particle.ELECTRIC_SPARK, Particle.ENCHANTMENT_TABLE };
+            PotionType[] potionTypes = { PotionType.INSTANT_DAMAGE, PotionType.POISON, PotionType.SLOWNESS, PotionType.WEAKNESS };
             
-            cloud.setBasePotionData(new PotionData(PotionType.INSTANT_DAMAGE));
-            cloud.setParticle(particles[random(3)]);
+            cloud.setBasePotionData(new PotionData(potionTypes[random]));
+            cloud.setParticle(particles[random]);
             
         }, 1 * 20);
     }
@@ -158,6 +200,7 @@ public class JoinChallengeCommand implements CommandExecutor
         skeleton.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 999999, 255, false, false));
         skeleton.getEquipment().setItemInMainHand(new ItemStack(Material.BOW));
         skeleton.getEquipment().setItemInOffHand(new ItemStack(Material.ARROW));
+        skeleton.setCanPickupItems(false);
     }
 
 
